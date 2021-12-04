@@ -1,0 +1,35 @@
+name: main
+on:
+  push:
+    branches: [ master ]
+jobs:
+  create-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest version
+        uses: actions/checkout@v2
+      - name: Create something to cache
+        run: |
+          mkdir ~/.cache-store
+          echo "CachedContent" > ~/.cache-store/cachedFile.txt
+      - name: Initialize cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache-store
+          key: my-key-${{ github.run_id }}
+  restore-cache:
+    runs-on: ubuntu-latest
+    needs: create-cache
+    steps:
+      - name: Checkout latest version
+        uses: actions/checkout@v2
+      - name: Restore cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache-restore
+          key: my-key-${{ github.run_id }}
+      - name: Print cached content
+        run: |
+          less ~/.cache-restore/cachedFile.txt
